@@ -1,6 +1,6 @@
 {
   "name": "nko3-nodesque",
-  "version": "0.0.1",
+  "version": "0.0.1-1",
   "description": "Nodesque",
   "main": "server.js",
   "scripts": {
