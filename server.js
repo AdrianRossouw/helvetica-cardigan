@@ -18,10 +18,17 @@ var common = require('./lib/common');
 
 var state = new common.models.State();
 
-state.setup();
+state.setupServer();
 
 io.sockets.on('connection', function (socket) {
     socket.emit('state', state.deflate());
+
+    socket.on('words:change', function(args) {
+        var model = args[0];
+
+        console.log('got change event');
+        state.words.get(model.id).set(model);
+    });
 });
 
 console.log('Server running at http://0.0.0.0:8000/');
