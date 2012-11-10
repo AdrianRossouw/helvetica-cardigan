@@ -14,8 +14,14 @@ var server = app.listen(8000);
 var io = require('socket.io').listen(server);
 io.set('log level', 2);
 
+var common = require('./lib/common');
+
+var state = new common.models.State();
+
+state.setup();
+
 io.sockets.on('connection', function (socket) {
-  socket.emit('helloWorld', { hello: 'world' });
+    socket.emit('state', state.deflate());
 });
 
 console.log('Server running at http://0.0.0.0:8000/');
