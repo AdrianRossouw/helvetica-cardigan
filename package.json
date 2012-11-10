@@ -1,6 +1,6 @@
 {
   "name": "nko3-nodesque",
-  "version": "0.0.1-1",
+  "version": "0.0.1-2",
   "description": "Nodesque",
   "main": "server.js",
   "scripts": {
@@ -16,8 +16,7 @@
     "express": "~3.0.2",
     "socket.io": "~0.9.11",
     "session.socket.io": "~0.1.2",
-    "redis": "~0.8.2",
-    "hiredis": "~0.1.14"
+    "redis": "~0.8.2"
   },
   "engines": {
     "node": "0.8.x"
