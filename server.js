@@ -16,7 +16,7 @@ io.set('log level', 2);
 
 var common = require('./lib/common');
 
-var state = new common.models.State();
+var state = new common.models.Fridge({ id: 'default' });
 
 state.setupServer(io);
 
