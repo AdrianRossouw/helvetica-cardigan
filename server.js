@@ -7,16 +7,14 @@ var app = express();
 app.use('/assets', express.static(__dirname + '/assets'));
 app.use('/lib', express.static(__dirname + '/lib'));
 
-app.get('/', function(req, res) {
-    res.sendfile('index.html');
-});
 
 var server = app.listen(8000);
 
 var io = require('socket.io').listen(server);
 io.set('log level', 2);
 
-var common = require('./lib/common');
+var common = require('./lib/common'),
+    models = common.models;
 
 var common_words = require('./common_words.json');
 var hipster_words = require('./hipster_words.json');
@@ -64,11 +62,13 @@ common.models.Fridge.augment({
 
         this.words.reset(json);
 
+        var nsp = '/' + fridge.id;
+
         this.words.on('change', function() {
-            io.sockets.emit('words:change', arguments);
+            io.of(nsp).emit('words:change', arguments);
         });
 
-        io.sockets.on('connection', function(socket) {
+        io.of(nsp).on('connection', function(socket) {
             socket.emit('fridge', fridge.deflate());
 
             socket.on('words:change', function(args) {
@@ -84,8 +84,15 @@ common.models.Fridge.augment({
 });
 
 
-var state = new common.models.Fridge({ id: 'default' });
+var fridges = {};
 
-state.setup();
+app.get('/:id?', function(req, res) {
+    var id = req.params.id || 'default';
+    if (!fridges[id]) {
+        fridges[id] = new models.Fridge({id: id});
+        fridges[id].setup();
+    }
+    res.sendfile('index.html');
+});
 
 console.log('Server running at http://0.0.0.0:8000/');
