@@ -136,11 +136,13 @@ common.models.Fridge.augment({
 
         var nsp = '/' + fridge.id;
 
+        var namespace = io.of(nsp);
+
         this.words.on('change', function() {
-            io.of(nsp).emit('words:change', arguments);
+            namespace.emit('words:change', arguments);
         });
 
-        io.of(nsp).on('connection', function(socket) {
+        namespace.on('connection', function(socket) {
             socket.emit('fridge', fridge.toJSON());
 
             socket.on('words:change', function(args) {
