@@ -41,6 +41,7 @@ function getWordCounts(words) {
         counts[word] = (counts[word] || 0) + 1;
     });
     return counts;
+}
 
 function generateWords(dict) {
     // helper to return a word at a random index in the dictionary.
