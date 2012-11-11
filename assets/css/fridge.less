@@ -20,6 +20,16 @@ body {
     background-image: url('/assets/images/snow.png');
 }
 
+a.back {
+    font-family: helvetica;
+    color: blue;
+    text-decoration: none;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 10000;
+}
+
 #voteforus {
     position: fixed;
     bottom: 20px;
@@ -40,27 +50,27 @@ body {
 
 .words {
     position: relative;
+}
 
-    .word {
-        position: absolute;
-        padding: 0 11px;
-        z-index: 2;
-        cursor: pointer;
+.word {
+    position: absolute;
+    padding: 0 11px;
+    z-index: 2;
+    cursor: pointer;
 
-        background-color: #fff;
-        color: #222;
-        .box-shadow(~"0 2px 5px rgba(0,0,0,0.25)");
+    background-color: #fff;
+    color: #222;
+    .box-shadow(~"0 2px 5px rgba(0,0,0,0.25)");
 
-        .noselect();
+    .noselect();
 
-        &:hover {
-            background-color: #ffe;
-        }
+    &:hover {
+        background-color: #ffe;
+    }
 
-        &.animate {
-            //.transition-all(1s);
-            .transition-all(0.2s);
-        }
+    &.animate {
+        //.transition-all(1s);
+        .transition-all(0.2s);
     }
 }
 
