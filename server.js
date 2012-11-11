@@ -78,7 +78,9 @@ common.models.Fridge.augment({
             };
         }
 
-        var json = _(generateWords(hipster_words)).map(generateJson);
+        var words = generateWords(extractWords(this.get('text')));
+
+        var json = _(words).map(generateJson);
 
         this.words.reset(json);
 
@@ -109,10 +111,20 @@ var fridges = {};
 app.get('/:id?', function(req, res) {
     var id = req.params.id || 'default';
     if (!fridges[id]) {
-        fridges[id] = new models.Fridge({id: id});
-        fridges[id].setup();
+        // add conditional fridge loading code in here.
     }
     res.sendfile('index.html');
+});
+
+app.post('/', function(req, res) {
+    function getParams(d, k) { return req.params[k] || d; }
+
+    var id = _.uniqueId('fridge');
+    var attrs = _(models.Fridge.prototype.defaults).map(getParams);
+    attrs.id = id;
+
+    fridges[id] = new models.Fridge(attrs);
+    fridges[id].setup();
 });
 
 console.log('Server running at http://0.0.0.0:8000/');
