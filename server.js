@@ -1,6 +1,8 @@
 var express = require('express'),
     _ = require('underscore')._,
-    Backbone = require('backbone');
+    Backbone = require('backbone'),
+    async = require('async'),
+    $ = require('jquery');
 
 var app = express();
 
@@ -69,6 +71,10 @@ function generateWords(dict, common, random) {
 
 
 common.models.Fridge.augment({
+    initialize: function(parent, options) {
+        parent.call(this, options);
+        _.bindAll(this, 'setWords');
+    },
     setWords: function(parent) {
         var fridge = this;
 
@@ -119,29 +125,46 @@ common.models.Fridge.augment({
             });
         });
     },
+    sync: function(parent, method, model, options) {
+        var dfr = new $.Deferred();
+
+        dfr.then(options.success, options.error);
+
+        if (!_.include(['read', 'create'])) {
+            dfr.reject('Unsupported Method');
+        } else if (method == 'read') {
+            // fetching
+            db.getFridge('default', function(err, fridge) {
+                if (err) { return dfr.reject("Could not load fridge"); }
+                dfr.resolve(fridge);
+            });
+        } else if (method == 'create') {
+            // saving
+            db.addFridge(model.toJSON(), function(err, data) {
+                if (err) return dfr.reject("Could not save fridge");
+                dfr.resolve(data); // should we be passing data back?
+            });
+        }
+
+        return dfr.promise();
+    }
 });
 
 
 var fridges = {};
 
-db.getFridge('default', function(err, fridge) {
-    if (err) {
-        // doesnt exist or we couldnt load it. create a new one?
-        fridges.default = new models.Fridge({id: 'default'});
-        fridges.default.setWords();
-    } else {
-        fridges.default = fridge;
-    }
+var _fridge = fridges.default = new models.Fridge({id: 'default'});
 
-    fridges.default.setup();
-});
+_fridge.fetch().fail(_fridge.setWords).always(_fridge.setup);
 
 
 app.get('/:id?', function(req, res) {
     var id = req.params.id || 'default';
     if (!fridges[id]) {
-        // add conditional fridge loading code in here.
-        return res.send(404, 'Sorry, we cannot find that!');
+        var fridge = new models.Fridge({id: id});
+        var onErr = _.bind(res.send, res, 404);
+
+        return fridge.fetch().fail(onErr).always(fridge.setup);
     }
     res.sendfile('index.html');
 });
