@@ -56,8 +56,34 @@ function generateWords(dict, common, random) {
         return dict[index];
     };
 
+
     // We pre-seed the words with the first 100 most common english words.
-    var words = (common) ? _(common_words).first(100) : [];
+    var words = (common) ? _(common_words.words).first(100) : [];
+
+    // 2 X
+    words = words.concat(common_words.prefixes);
+    words = words.concat(common_words.prefixes);
+
+    // 2 X
+    words = words.concat(common_words.suffixes);
+    words = words.concat(common_words.suffixes);
+
+    // 3 X
+    words = words.concat(common_words.punctuation);
+    words = words.concat(common_words.punctuation);
+    words = words.concat(common_words.punctuation);
+
+    // pick 10 of each of these
+
+    var index;
+    var numMorePrefixes = common_words.morePrefixes.length;
+    var numMoreSuffixes = common_words.moreSuffixes.length;
+    for (var i=0; i<10; i++) {
+        index = Math.round(Math.random() * numMorePrefixes);
+        words.push(common_words.morePrefixes[index]);
+        index = Math.round(Math.random() * numMoreSuffixes);
+        words.push(common_words.moreSuffixes[index]);
+    }
 
     // the amount of words left to reach our max quota.
     var moreWordCount = wordCount - words.length;
