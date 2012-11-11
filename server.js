@@ -60,7 +60,6 @@ common.models.Fridge.augment({
             };
         }
 
-
         var json = _(generateWords(hipster_words)).map(generateJson);
 
         this.words.reset(json);
