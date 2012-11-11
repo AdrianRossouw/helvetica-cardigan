@@ -21,7 +21,7 @@ var common = require('./lib/common'),
     models = common.models;
 
 var common_words = require('./common_words.json');
-var wordCount = 300;
+var wordCount = 350;
 
 function extractWords(text) {
     var text = text.toLowerCase();
