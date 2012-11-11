@@ -82,6 +82,15 @@ body {
   color: #222;
   background-image: url('/assets/images/snow.png');
 }
+a.back {
+  font-family: helvetica;
+  color: blue;
+  text-decoration: none;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 10000;
+}
 #voteforus {
   position: fixed;
   bottom: 20px;
@@ -100,7 +109,7 @@ body {
 .words {
   position: relative;
 }
-.words .word {
+.word {
   position: absolute;
   padding: 0 11px;
   z-index: 2;
@@ -117,10 +126,10 @@ body {
   -ms-user-select: none;
   user-select: none;
 }
-.words .word:hover {
+.word:hover {
   background-color: #ffe;
 }
-.words .word.animate {
+.word.animate {
   -webkit-transition: all 0.2s ease-in-out;
   -moz-transition: all 0.2s ease-in-out;
   -ms-transition: all 0.2s ease-in-out;
