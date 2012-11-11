@@ -142,6 +142,12 @@ common.models.Fridge.augment({
             namespace.emit('words:change', arguments);
         });
 
+        // ugly kludge to avoid rooms just going dead? maybe ?
+        var interval = setInterval(function() {
+            console.log('keepalive for ' + fridge.id);
+            namespace.emit('ping', {"keep": "alive"});
+        }, 120000);
+
         namespace.on('connection', function(socket) {
             socket.emit('fridge', fridge.toJSON());
 
