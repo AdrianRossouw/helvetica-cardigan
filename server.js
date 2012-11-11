@@ -107,11 +107,14 @@ common.models.Fridge.augment({
 
 
 var fridges = {};
+fridges.default = new models.Fridge({id: 'default'});
+fridges.default.setup();
 
 app.get('/:id?', function(req, res) {
     var id = req.params.id || 'default';
     if (!fridges[id]) {
         // add conditional fridge loading code in here.
+        return res.send(404, 'Sorry, we cannot find that!');
     }
     res.sendfile('index.html');
 });
@@ -125,6 +128,7 @@ app.post('/', function(req, res) {
 
     fridges[id] = new models.Fridge(attrs);
     fridges[id].setup();
+    res.redirect('/' + id);
 });
 
 console.log('Server running at http://0.0.0.0:8000/');
