@@ -84,7 +84,7 @@ common.models.Fridge.augment({
 
         function generateJson(w, i) {
             return {
-                id: _.uniqueId('word'),
+                id: fridge.id + '_' + i,
                 x: randomDim(fridge.dimensions[0]),
                 y: randomDim(fridge.dimensions[1]),
                 word: w
@@ -113,7 +113,7 @@ common.models.Fridge.augment({
         });
 
         io.of(nsp).on('connection', function(socket) {
-            socket.emit('fridge', fridge.deflate());
+            socket.emit('fridge', fridge.toJSON());
 
             socket.on('words:change', function(args) {
                 var model = args[0];
@@ -125,12 +125,15 @@ common.models.Fridge.augment({
             });
         });
     },
+    isNew: function(parent) {
+        return !this.has('created');
+    },
     sync: function(parent, method, model, options) {
         var dfr = new $.Deferred();
 
         dfr.then(options.success, options.error);
 
-        if (!_.include(['read', 'create'])) {
+        if (!_.include(['read', 'create'], method)) {
             dfr.reject('Unsupported Method');
         } else if (method == 'read') {
             // fetching
@@ -140,9 +143,10 @@ common.models.Fridge.augment({
             });
         } else if (method == 'create') {
             // saving
+            model.set('created', Date.now());
             db.addFridge(model.toJSON(), function(err, data) {
                 if (err) return dfr.reject("Could not save fridge");
-                dfr.resolve(data); // should we be passing data back?
+                dfr.resolve(model.toJSON()); // should we be passing data back?
             });
         }
 
@@ -155,13 +159,17 @@ var fridges = {};
 
 var _fridge = fridges.default = new models.Fridge({id: 'default'});
 
-_fridge.fetch().fail(_fridge.setWords).always(_fridge.setup);
+var log = _.bind(console.log, console);
+
+_fridge.fetch()
+    .fail(function() { _fridge.setWords(); _fridge.save().then(log, log); })
+    .always(_fridge.setup);
 
 
 app.get('/:id?', function(req, res) {
     var id = req.params.id || 'default';
     if (!fridges[id]) {
-        var fridge = new models.Fridge({id: id});
+        var fridge = fridges[id] = new models.Fridge({id: id});
         var onErr = _.bind(res.send, res, 404);
 
         return fridge.fetch().fail(onErr).always(fridge.setup);
@@ -171,14 +179,19 @@ app.get('/:id?', function(req, res) {
 
 app.post('/', function(req, res) {
     function getParams(d, k) { return req.params[k] || d; }
-
+    
     var id = _.uniqueId('fridge');
+
     var attrs = _(models.Fridge.prototype.defaults).map(getParams);
     attrs.id = id;
 
-    fridges[id] = new models.Fridge(attrs);
-    fridges[id].setup();
-    res.redirect('/' + id);
+    var fridge = fridges[id] = new models.Fridge(attrs);
+
+    var onErr = _.bind(res.redirect, res, '/' + id); 
+
+    fridges[id].save()
+        .done(fridge.setup)
+        .fail(onErr)
 });
 
 console.log('Server running at http://0.0.0.0:8000/');
