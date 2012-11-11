@@ -132,7 +132,6 @@ common.models.Fridge.augment({
         this.words.reset(json);
     },
     setup: function(parent) {
-        console.log("setup run for " + this.id);
         var fridge = this;
 
         var nsp = '/' + fridge.id;
@@ -145,7 +144,6 @@ common.models.Fridge.augment({
             socket.emit('fridge', fridge.toJSON());
 
             socket.on('words:change', function(args) {
-                console.log('got change event from client');
                 var json = args[0];
                 var word = fridge.words.get(json.id);
                 word.set({ x: json.x, y: json.y });
@@ -192,7 +190,6 @@ models.Word.augment({
             dfr.reject('Unsupported Method');
         } else if (method == 'update') {
             db.setWord(model.toJSON(), function(err, data) {
-                console.log(err);
                 if (err) return dfr.reject("Could not update word");
                 dfr.resolve(model.toJSON());
             });
