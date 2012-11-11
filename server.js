@@ -164,7 +164,7 @@ common.models.Fridge.augment({
             dfr.reject('Unsupported Method');
         } else if (method == 'read') {
             // fetching
-            db.getFridge('default', function(err, fridge) {
+            db.getFridge(model.id, function(err, fridge) {
                 if (err) { return dfr.reject("Could not load fridge"); }
                 dfr.resolve(fridge);
             });
@@ -210,21 +210,23 @@ _fridge.fetch()
     .fail(function() { _fridge.setWords(); _fridge.save(); })
     .always(_fridge.setup);
 
-app.get('/:id?', function(req, res, next) {
+function loadFridge(req, res, next) {
     var id = req.params.id || 'default';
 
     if (fridges[id]) return res.sendfile('index.html');
 
-    return next();
-
     var fridge = fridges[id] = new models.Fridge({id: id});
     var onErr = _.bind(res.send, res, 404);
 
-    fridge.fetch().fail(onErr).done(function() {
+    fridge.fetch().then(function() {
         fridge.setup();
         res.sendfile('index.html');
-    });
-});
+    }, onErr);
+}
+
+app.get('/', loadFridge);
+app.get('/f/:id', loadFridge);
+
 
 app.post('/', function(req, res) {
     function getParams(m, d, k) {
@@ -240,7 +242,7 @@ app.post('/', function(req, res) {
     var fridge = fridges[id] = new models.Fridge(attrs);
     fridge.setWords();
 
-    var onErr = function() { res.redirect('/' + id); }
+    var onErr = function() { res.redirect('/f/' + id); }
 
     var log = _.bind(console.log, console);
     fridge.save().then(log, log)
