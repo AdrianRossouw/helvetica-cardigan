@@ -73,7 +73,7 @@ function generateWords(dict, common, random) {
 common.models.Fridge.augment({
     initialize: function(parent, options) {
         parent.call(this, options);
-        _.bindAll(this, 'setWords');
+        _.bindAll(this, 'setWords', 'setup');
     },
     setWords: function(parent) {
         var fridge = this;
@@ -85,6 +85,7 @@ common.models.Fridge.augment({
         function generateJson(w, i) {
             return {
                 id: fridge.id + '_' + i,
+                fridgeid: fridge.id,
                 x: randomDim(fridge.dimensions[0]),
                 y: randomDim(fridge.dimensions[1]),
                 word: w
@@ -116,12 +117,11 @@ common.models.Fridge.augment({
             socket.emit('fridge', fridge.toJSON());
 
             socket.on('words:change', function(args) {
-                var model = args[0];
                 console.log('got change event from client');
-                fridge.words.get(model.id).set({
-                    x: model.x,
-                    y: model.y
-                });
+                var json = args[0];
+                var word = fridge.words.get(json.id);
+                word.set({ x: json.x, y: json.y });
+                word.save();
             });
         });
     },
@@ -154,15 +154,33 @@ common.models.Fridge.augment({
     }
 });
 
+models.Word.augment({
+    sync: function(parent, method, model, options) {
+        var dfr = new $.Deferred();
+
+        dfr.then(options.success, options.error);
+
+        if (!_.include(['update'], method)) {
+            dfr.reject('Unsupported Method');
+        } else if (method == 'update') {
+            db.setWord(model.toJSON(), function(err, data) {
+                console.log(err);
+                if (err) return dfr.reject("Could not update word");
+                dfr.resolve(model.toJSON());
+            });
+        }
+
+        return dfr.promise();
+    }
+});
 
 var fridges = {};
 
 var _fridge = fridges.default = new models.Fridge({id: 'default'});
 
-var log = _.bind(console.log, console);
 
 _fridge.fetch()
-    .fail(function() { _fridge.setWords(); _fridge.save().then(log, log); })
+    .fail(function() { _fridge.setWords(); _fridge.save(); })
     .always(_fridge.setup);
 
 
