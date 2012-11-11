@@ -224,6 +224,7 @@ function loadFridge(req, res, next) {
 
 app.get('/', loadFridge);
 app.get('/f/:id', loadFridge);
+app.get('/f/:id/:flavor?', loadFridge);
 
 app.post('/', function(req, res) {
     function getParams(m, d, k) {
