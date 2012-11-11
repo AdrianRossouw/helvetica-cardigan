@@ -63,3 +63,175 @@ body {
         }
     }
 }
+
+.add-fridge-ui,
+.share-fridge-ui {
+    position: fixed;
+    z-index: 10000;
+    top: 20px;
+    right: 20px;
+    text-align: right;
+}
+
+.btn {
+    display: inline-block;
+    font-family: "helvetica neue", sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+    margin: 0;
+    padding: 4px 12px;
+    color: #fff;
+
+    cursor: pointer;
+
+    border: 1px solid #bbbbbb;
+    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+    .border-radius(4px);
+
+    background-color: #006dcc;
+    background-image: -moz-linear-gradient(top, #0088cc, #0044cc);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#0088cc), to(#0044cc));
+    background-image: -webkit-linear-gradient(top, #0088cc, #0044cc);
+    background-image: -o-linear-gradient(top, #0088cc, #0044cc);
+    background-image: linear-gradient(to bottom, #0088cc, #0044cc);
+    background-repeat: repeat-x;
+
+    -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+    -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+
+    &:hover {
+        background-color: #0044cc;
+        background-position: 0 -15px;
+        -webkit-transition: background-position 0.1s linear;
+        -moz-transition: background-position 0.1s linear;
+        -o-transition: background-position 0.1s linear;
+        transition: background-position 0.1s linear;
+    }
+}
+
+form {
+    position: relative;
+    text-align: left;
+    font-family: "helvetica neue", sans-serif;
+    font-size: 13px;
+    line-height: 18px;
+    background-color: #fff;
+    color: #333;
+    margin-top: 10px;
+    width: 290px;
+
+    .transition-all();
+
+    &.hidden {
+        padding: 0;
+        height: 0;
+        opacity: 0;
+        overflow: hidden;
+    }
+
+    &.visible {
+        padding: 15px;
+        opacity: 1;
+        height: auto;
+    }
+
+    .box-shadow(~"0 5px 10px rgba(0, 0, 0, 0.2)");
+    .border-radius(3px);
+
+    &:before {
+        border-top: 0;
+        border: 8px solid #fff;
+        border-left-color: transparent;
+        border-right-color: transparent;
+        border-top: none;
+        position: absolute;
+        right: 16px;
+        top: -8px;
+        margin-left: -8px;
+        display: inline-block;
+        content: '';
+    }
+
+    .field {
+        margin-bottom: 10px;
+    }
+
+    .btn {
+        display: block;
+        width: 100%;
+    }
+
+    input[type=checkbox],
+    input + label {
+        display: inline-block;
+        vertical-align: middle;
+    }
+}
+
+input[type=checkbox] {
+    margin-right: 10px;
+}
+
+input[type=text],
+textarea {
+    font-family: "helvetica neue", sans-serif;
+    line-height: 20px;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    display: block;
+    resize: none;
+    padding: 2px 4px;
+
+    background-color: #fff;
+    border: 1px solid #ccc;
+    .border-radius(5px);
+    .box-shadow(~"inset 0 1px 1px rgba(0, 0, 0, .075)");
+    .transition(~"border linear .2s, box-shadow linear .2s");
+
+    &.error {
+        background-color: #FFE4E1;
+    }
+}
+input[type=text] {
+    font-size: 12px;
+}
+textarea {
+    font-size: 12px;
+}
+textarea[name=description] {
+    height: 3em;
+}
+textarea[name=text] {
+    height: 7em;
+}
+
+select:focus,
+input[type=text]:focus,
+textarea:focus {
+    border-color: rgba(82,168,236,.8);
+    outline: 0;
+    .box-shadow(~"inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6)");
+}
+
+@media screen and (max-width: 360px) {
+    .add-fridge-ui,
+    .share-fridge-ui {
+        right: 0;
+
+        .show {
+            margin-right: 20px;
+        }
+
+        form {
+            &:before {
+                right: 36px;
+            }
+        }
+    }
+}
