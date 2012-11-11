@@ -23,6 +23,25 @@ var hipster_words = require('./hipster_words.json');
 
 var wordCount = 300;
 
+function extractWords(text) {
+    var text = text.toLowerCase();
+    text = text.replace(/\n/g, ' ');
+    text = text.replace(/[^A-Za-z\-\'0-9\ ]/g, '');
+
+    var words = text.split(' ');
+    words = _.filter(words, function(word) {
+        return (word.trim() && word.split('-').length < 3);
+    });
+    return words;
+}
+
+function getWordCounts(words) {
+    var counts = {};
+    _.each(words, function(word) {
+        counts[word] = (counts[word] || 0) + 1;
+    });
+    return counts;
+
 function generateWords(dict) {
     // helper to return a word at a random index in the dictionary.
     function randomWords() {
@@ -36,7 +55,7 @@ function generateWords(dict) {
     // the amount of words left to reach our max quota.
     var moreWordCount = wordCount - baseWords.length;
 
-    // get the random words. 
+    // get the random words.
     var moreWords = _.range(0, moreWordCount).map(randomWords);
 
     return baseWords.concat(moreWords);
