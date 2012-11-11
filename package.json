@@ -17,7 +17,8 @@
     "socket.io": "~0.9.11",
     "redis": "~0.8.2",
     "async": "~0.1.22",
-    "jquery": "~1.7.3"
+    "jquery": "~1.7.3",
+    "connect": "~2.6.2"
   },
   "engines": {
     "node": "0.8.x"
