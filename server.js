@@ -2,7 +2,8 @@ var express = require('express'),
     _ = require('underscore')._,
     Backbone = require('backbone'),
     async = require('async'),
-    $ = require('jquery');
+    $ = require('jquery'),
+    connect = require('connect');
 
 var app = express();
 
@@ -227,14 +228,13 @@ function loadFridge(req, res, next) {
 app.get('/', loadFridge);
 app.get('/f/:id', loadFridge);
 
-
 app.post('/', function(req, res) {
     function getParams(m, d, k) {
         m[k] = req.params[k] || d;
         return m;
     }
     
-    var id = _.uniqueId('fridge');
+    var id = connect.utils.uid(12).replace(/\//g,'+');
 
     var attrs = _(models.Fridge.prototype.defaults).reduce(getParams, {});
     attrs.id = id;
@@ -242,12 +242,9 @@ app.post('/', function(req, res) {
     var fridge = fridges[id] = new models.Fridge(attrs);
     fridge.setWords();
 
-    var onErr = function() { res.redirect('/f/' + id); }
+    var redir = function() { res.redirect('/f/' + id); }
 
-    var log = _.bind(console.log, console);
-    fridge.save().then(log, log)
-        .done(fridge.setup)
-        .always(onErr)
+    fridge.save().done(fridge.setup).always(redir)
 });
 
 console.log('Server running at http://0.0.0.0:8000/');
