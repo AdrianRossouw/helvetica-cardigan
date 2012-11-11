@@ -14,11 +14,10 @@ var io = require('socket.io').listen(server);
 io.set('log level', 2);
 
 var common = require('./lib/common'),
+    db = require('./lib/db'),
     models = common.models;
 
 var common_words = require('./common_words.json');
-var hipster_words = require('./hipster_words.json');
-
 var wordCount = 300;
 
 function extractWords(text) {
@@ -70,7 +69,7 @@ function generateWords(dict, common, random) {
 
 
 common.models.Fridge.augment({
-    setup: function(parent) {
+    setWords: function(parent) {
         var fridge = this;
 
         function randomDim(max) {
@@ -97,6 +96,9 @@ common.models.Fridge.augment({
         var json = _(words).map(generateJson);
 
         this.words.reset(json);
+    },
+    setup: function(parent) {
+        var fridge = this;
 
         var nsp = '/' + fridge.id;
 
@@ -121,8 +123,19 @@ common.models.Fridge.augment({
 
 
 var fridges = {};
-fridges.default = new models.Fridge({id: 'default'});
-fridges.default.setup();
+
+db.getFridge('default', function(err, fridge) {
+    if (err) {
+        // doesnt exist or we couldnt load it. create a new one?
+        fridges.default = new models.Fridge({id: 'default'});
+        fridges.default.setWords();
+    } else {
+        fridges.default = fridge;
+    }
+
+    fridges.default.setup();
+});
+
 
 app.get('/:id?', function(req, res) {
     var id = req.params.id || 'default';
