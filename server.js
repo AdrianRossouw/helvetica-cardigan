@@ -41,23 +41,31 @@ function getWordCounts(words) {
     return counts;
 }
 
-function generateWords(dict) {
+function generateWords(dict, common, random) {
     // helper to return a word at a random index in the dictionary.
     function randomWords() {
         var index = Math.round(Math.random() * dict.length);
         return dict[index];
     }
 
+    // helper function to return each word in series
+    // also loops over and begins again.
+    function seriesWords(i) {
+        var index = i % dict.length;
+        return dict[index];
+    };
+
     // We pre-seed the words with the first 100 most common english words.
-    var baseWords = _(common_words).first(100);
+    var words = (common) ? _(common_words).first(100) : [];
 
     // the amount of words left to reach our max quota.
-    var moreWordCount = wordCount - baseWords.length;
+    var moreWordCount = wordCount - words.length;
 
-    // get the random words.
-    var moreWords = _.range(0, moreWordCount).map(randomWords);
+    // buffer/randomize the words.
+    var mapFn = (random) ? randomWords : seriesWords;
+    var moreWords = _.range(0, moreWordCount).map(mapFn);
 
-    return baseWords.concat(moreWords);
+    return words.concat(moreWords);
 }
 
 
@@ -78,7 +86,13 @@ common.models.Fridge.augment({
             };
         }
 
-        var words = generateWords(extractWords(this.get('text')));
+        var extracted = extractWords(this.get('text'));
+
+        var words = generateWords(
+            extracted,
+            this.get('common'),
+            this.get('randomize')
+        );
 
         var json = _(words).map(generateJson);
 
