@@ -9,7 +9,7 @@ var app = express();
 
 app.use('/assets', express.static(__dirname + '/assets'));
 app.use('/lib', express.static(__dirname + '/lib'));
-
+app.use(express.bodyParser());
 
 var server = app.listen(8000);
 
@@ -230,7 +230,7 @@ app.get('/f/:id', loadFridge);
 
 app.post('/', function(req, res) {
     function getParams(m, d, k) {
-        m[k] = req.params[k] || d;
+        m[k] = req.body[k] || d;
         return m;
     }
     
