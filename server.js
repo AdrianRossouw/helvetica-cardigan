@@ -105,6 +105,7 @@ common.models.Fridge.augment({
         this.words.reset(json);
     },
     setup: function(parent) {
+        console.log("setup run for " + this.id);
         var fridge = this;
 
         var nsp = '/' + fridge.id;
@@ -183,33 +184,42 @@ _fridge.fetch()
     .fail(function() { _fridge.setWords(); _fridge.save(); })
     .always(_fridge.setup);
 
-
-app.get('/:id?', function(req, res) {
+app.get('/:id?', function(req, res, next) {
     var id = req.params.id || 'default';
-    if (!fridges[id]) {
-        var fridge = fridges[id] = new models.Fridge({id: id});
-        var onErr = _.bind(res.send, res, 404);
 
-        return fridge.fetch().fail(onErr).always(fridge.setup);
-    }
-    res.sendfile('index.html');
+    if (fridges[id]) return res.sendfile('index.html');
+
+    return next();
+
+    var fridge = fridges[id] = new models.Fridge({id: id});
+    var onErr = _.bind(res.send, res, 404);
+
+    fridge.fetch().fail(onErr).done(function() {
+        fridge.setup();
+        res.sendfile('index.html');
+    });
 });
 
 app.post('/', function(req, res) {
-    function getParams(d, k) { return req.params[k] || d; }
+    function getParams(m, d, k) {
+        m[k] = req.params[k] || d;
+        return m;
+    }
     
     var id = _.uniqueId('fridge');
 
-    var attrs = _(models.Fridge.prototype.defaults).map(getParams);
+    var attrs = _(models.Fridge.prototype.defaults).reduce(getParams, {});
     attrs.id = id;
 
     var fridge = fridges[id] = new models.Fridge(attrs);
+    fridge.setWords();
 
-    var onErr = _.bind(res.redirect, res, '/' + id); 
+    var onErr = function() { res.redirect('/' + id); }
 
-    fridges[id].save()
+    var log = _.bind(console.log, console);
+    fridge.save().then(log, log)
         .done(fridge.setup)
-        .fail(onErr)
+        .always(onErr)
 });
 
 console.log('Server running at http://0.0.0.0:8000/');
