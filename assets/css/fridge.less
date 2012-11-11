@@ -121,20 +121,16 @@ form {
     color: #333;
     margin-top: 10px;
     width: 290px;
+    padding: 15px;
 
     .transition-all();
 
     &.hidden {
-        padding: 0;
-        height: 0;
-        opacity: 0;
-        overflow: hidden;
+        display: none;
     }
 
     &.visible {
-        padding: 15px;
-        opacity: 1;
-        height: auto;
+        display: block;
     }
 
     .box-shadow(~"0 5px 10px rgba(0, 0, 0, 0.2)");
@@ -156,6 +152,10 @@ form {
 
     .field {
         margin-bottom: 10px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
     }
 
     .btn {

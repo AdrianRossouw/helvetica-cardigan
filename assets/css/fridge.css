@@ -179,6 +179,7 @@ form {
   color: #333;
   margin-top: 10px;
   width: 290px;
+  padding: 15px;
   -webkit-transition: all 0.1s ease-in-out;
   -moz-transition: all 0.1s ease-in-out;
   -ms-transition: all 0.1s ease-in-out;
@@ -192,15 +193,10 @@ form {
   border-radius: 3px;
 }
 form.hidden {
-  padding: 0;
-  height: 0;
-  opacity: 0;
-  overflow: hidden;
+  display: none;
 }
 form.visible {
-  padding: 15px;
-  opacity: 1;
-  height: auto;
+  display: block;
 }
 form:before {
   border-top: 0;
@@ -217,6 +213,9 @@ form:before {
 }
 form .field {
   margin-bottom: 10px;
+}
+form .field:last-child {
+  margin-bottom: 0;
 }
 form .btn {
   display: block;
