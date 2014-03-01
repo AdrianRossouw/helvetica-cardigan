@@ -11,91 +11,13 @@ app.use('/assets', express.static(__dirname + '/assets'));
 app.use('/lib', express.static(__dirname + '/lib'));
 app.use(express.bodyParser());
 
-var server = app.listen(8000);
-
-var io = require('socket.io').listen(server);
-io.set('log level', 2);
 
 var common = require('./lib/common'),
     db = require('./lib/db'),
     models = common.models;
 
 var common_words = require('./common_words.json');
-var wordCount = 350;
-
-function extractWords(text) {
-    var text = text.toLowerCase();
-    text = text.replace(/\n/g, ' ');
-    text = text.replace(/[^A-Za-z\-\'0-9\ ]/g, '');
-
-    var words = text.split(' ');
-    words = _.filter(words, function(word) {
-        return (word.trim() && word.split('-').length < 3);
-    });
-    return words;
-}
-
-function getWordCounts(words) {
-    var counts = {};
-    _.each(words, function(word) {
-        counts[word] = (counts[word] || 0) + 1;
-    });
-    return counts;
-}
-
-function generateWords(dict, common, random) {
-    // helper to return a word at a random index in the dictionary.
-    function randomWords() {
-        var index = Math.round(Math.random() * dict.length);
-        return dict[index];
-    }
-
-    // helper function to return each word in series
-    // also loops over and begins again.
-    function seriesWords(i) {
-        var index = i % dict.length;
-        return dict[index];
-    };
-
-
-    // We pre-seed the words with the first 100 most common english words.
-    var words = (common) ? _(common_words.words).first(100) : [];
-
-    // 2 X
-    words = words.concat(common_words.prefixes);
-    words = words.concat(common_words.prefixes);
-
-    // 2 X
-    words = words.concat(common_words.suffixes);
-    words = words.concat(common_words.suffixes);
-
-    // 3 X
-    words = words.concat(common_words.punctuation);
-    words = words.concat(common_words.punctuation);
-    words = words.concat(common_words.punctuation);
-
-    // pick 10 of each of these
-
-    var index;
-    var numMorePrefixes = common_words.morePrefixes.length;
-    var numMoreSuffixes = common_words.moreSuffixes.length;
-    for (var i=0; i<10; i++) {
-        index = Math.round(Math.random() * numMorePrefixes);
-        words.push(common_words.morePrefixes[index]);
-        index = Math.round(Math.random() * numMoreSuffixes);
-        words.push(common_words.moreSuffixes[index]);
-    }
-
-    // the amount of words left to reach our max quota.
-    var moreWordCount = wordCount - words.length;
-
-    // buffer/randomize the words.
-    var mapFn = (random) ? randomWords : seriesWords;
-    var moreWords = _.range(0, moreWordCount).map(mapFn);
-
-    return words.concat(moreWords);
-}
-
+var wordCount = 200;
 
 common.models.Fridge.augment({
     initialize: function(parent, options) {
@@ -169,17 +91,17 @@ common.models.Fridge.augment({
 
         if (!_.include(['read', 'create'], method)) {
             dfr.reject('Unsupported Method');
-        } else if (method == 'read') {
+        } else if (method === 'read') {
             // fetching
             db.getFridge(model.id, function(err, fridge) {
                 if (err) { return dfr.reject("Could not load fridge"); }
                 dfr.resolve(fridge);
             });
-        } else if (method == 'create') {
+        } else if (method === 'create') {
             // saving
             model.set('created', Date.now());
             db.addFridge(model.toJSON(), function(err, data) {
-                if (err) return dfr.reject("Could not save fridge");
+                if (err) { return dfr.reject("Could not save fridge"); }
                 dfr.resolve(model.toJSON()); // should we be passing data back?
             });
         }
@@ -196,9 +118,9 @@ models.Word.augment({
 
         if (!_.include(['update'], method)) {
             dfr.reject('Unsupported Method');
-        } else if (method == 'update') {
+        } else if (method === 'update') {
             db.setWord(model.toJSON(), function(err, data) {
-                if (err) return dfr.reject("Could not update word");
+                if (err) { return dfr.reject("Could not update word"); }
                 dfr.resolve(model.toJSON());
             });
         }
@@ -207,28 +129,21 @@ models.Word.augment({
     }
 });
 
+
 var fridges = {};
 
 var _fridge = fridges.default = new models.Fridge({id: 'default'});
 
 
 _fridge.fetch()
-    .fail(function() { _fridge.setWords(); _fridge.save(); })
-    .always(_fridge.setup);
+    .fail(function() {
+        _fridge.setWords();
+        _fridge.save();
+    })
+    .always(function() {
+        _fridge.setup();
+    });
 
-function loadFridge(req, res, next) {
-    var id = req.params.id || 'default';
-
-    if (fridges[id]) return res.sendfile('index.html');
-
-    var fridge = fridges[id] = new models.Fridge({id: id});
-    var onErr = _.bind(res.send, res, 404);
-
-    fridge.fetch().then(function() {
-        fridge.setup();
-        res.sendfile('index.html');
-    }, onErr);
-}
 
 app.get('/', loadFridge);
 app.get('/f/:id', loadFridge);
@@ -248,9 +163,102 @@ app.post('/', function(req, res) {
     var fridge = fridges[id] = new models.Fridge(attrs);
     fridge.setWords();
 
-    var redir = function() { res.redirect('/f/' + id); }
+    var redir = function() { res.redirect('/f/' + id); };
 
-    fridge.save().done(fridge.setup).always(redir)
+    fridge.save().done(fridge.setup).always(redir);
 });
+
+
+var server = app.listen(8000);
+
+var io = require('socket.io').listen(server);
+io.set('log level', 2);
+function extractWords(text) {
+    var text = text.toLowerCase();
+    text = text.replace(/\n/g, ' ');
+    text = text.replace(/[^A-Za-z\-\'0-9\ ]/g, '');
+
+    var words = text.split(' ');
+    words = _.filter(words, function(word) {
+        return (word.trim() && word.split('-').length < 3);
+    });
+    return words;
+}
+
+function getWordCounts(words) {
+    var counts = {};
+    _.each(words, function(word) {
+        counts[word] = (counts[word] || 0) + 1;
+    });
+    return counts;
+}
+
+function generateWords(dict, common, random) {
+    // helper to return a word at a random index in the dictionary.
+    function randomWords() {
+        var index = Math.round(Math.random() * dict.length);
+        return dict[index];
+    }
+
+    // helper function to return each word in series
+    // also loops over and begins again.
+    function seriesWords(i) {
+        var index = i % dict.length;
+        return dict[index];
+    }
+
+
+    // We pre-seed the words with the first 100 most common english words.
+    var words = (common) ? _(common_words.words).first(100) : [];
+
+    // 2 X
+    words = words.concat(common_words.prefixes);
+    words = words.concat(common_words.prefixes);
+
+    // 2 X
+    words = words.concat(common_words.suffixes);
+    words = words.concat(common_words.suffixes);
+
+    // 3 X
+    words = words.concat(common_words.punctuation);
+    words = words.concat(common_words.punctuation);
+    words = words.concat(common_words.punctuation);
+
+    // pick 10 of each of these
+
+    var index;
+    var numMorePrefixes = common_words.morePrefixes.length;
+    var numMoreSuffixes = common_words.moreSuffixes.length;
+    for (var i=0; i<10; i++) {
+        index = Math.round(Math.random() * numMorePrefixes);
+        words.push(common_words.morePrefixes[index]);
+        index = Math.round(Math.random() * numMoreSuffixes);
+        words.push(common_words.moreSuffixes[index]);
+    }
+
+    // the amount of words left to reach our max quota.
+    var moreWordCount = wordCount - words.length;
+
+    // buffer/randomize the words.
+    var mapFn = (random) ? randomWords : seriesWords;
+    var moreWords = _.range(0, moreWordCount).map(mapFn);
+
+    return words.concat(moreWords);
+}
+
+
+function loadFridge(req, res, next) {
+    var id = req.params.id || 'default';
+
+    if (fridges[id]) { return res.sendfile('index.html'); }
+
+    var fridge = fridges[id] = new models.Fridge({id: id});
+    var onErr = _.bind(res.send, res, 404);
+
+    fridge.fetch().then(function() {
+        fridge.setup();
+        res.sendfile('index.html');
+    }, onErr);
+}
 
 console.log('Server running at http://0.0.0.0:8000/');
