@@ -17,7 +17,7 @@ var common = require('./lib/common'),
     models = common.models;
 
 var common_words = require('./common_words.json');
-var wordCount = 200;
+var wordCount = 350;
 
 common.models.Fridge.augment({
     initialize: function(parent, options) {
@@ -72,13 +72,18 @@ common.models.Fridge.augment({
 
         namespace.on('connection', function(socket) {
             socket.emit('fridge', fridge.toJSON());
-
-            socket.on('words:change', function(args) {
+            console.log('connect:' + socket.id);
+            socket.on('words:change', wordsChange);
+            socket.on('disconnect', function() {
+                console.log('disconnect:' + socket.id);
+                socket.removeAllListeners('data');
+            });
+            function wordsChange(args) {
                 var json = args[0];
                 var word = fridge.words.get(json.id);
                 word.set({ x: json.x, y: json.y });
                 word.save();
-            });
+            }
         });
     },
     isNew: function(parent) {
