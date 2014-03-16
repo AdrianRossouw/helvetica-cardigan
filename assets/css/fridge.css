@@ -84,12 +84,27 @@ body {
 }
 a.back {
   font-family: helvetica;
-  color: blue;
+  color: #fff;
   text-decoration: none;
   position: fixed;
-  top: 20px;
-  left: 20px;
+  top: 5px;
+  left: 5px;
   z-index: 10000;
+}
+a.title {
+  left: 50px;
+}
+.add-fridge-ui,
+.share-fridge-ui {
+  position: fixed;
+  z-index: 10000;
+  top: 5px;
+  right: 5px;
+  text-align: right;
+}
+
+.add-fridge-ui {
+  right: 70px;
 }
 #voteforus {
   position: fixed;
@@ -136,14 +151,8 @@ a.back {
   -o-transition: all 0.2s ease-in-out;
   transition: all 0.2s ease-in-out;
 }
-.add-fridge-ui,
-.share-fridge-ui {
-  position: fixed;
-  z-index: 10000;
-  top: 20px;
-  right: 20px;
-  text-align: right;
-}
+
+
 .btn {
   display: inline-block;
   font-family: "helvetica neue", sans-serif;
