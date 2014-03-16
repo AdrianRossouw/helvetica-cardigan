@@ -2,8 +2,9 @@ var express = require('express'),
     _ = require('underscore')._,
     Backbone = require('backbone'),
     async = require('async'),
-    $ = require('jquery'),
     connect = require('connect');
+
+_.mixin( require('underscore.deferred') );
 
 var app = express();
 
@@ -84,7 +85,7 @@ common.models.Fridge.augment({
         return !this.has('created');
     },
     sync: function(parent, method, model, options) {
-        var dfr = new $.Deferred();
+        var dfr = new _.Deferred();
 
         dfr.then(options.success, options.error);
 
@@ -111,7 +112,7 @@ common.models.Fridge.augment({
 
 models.Word.augment({
     sync: function(parent, method, model, options) {
-        var dfr = new $.Deferred();
+        var dfr = new _.Deferred();
 
         dfr.then(options.success, options.error);
 
@@ -146,7 +147,7 @@ _fridge.fetch()
 
 app.get('/', loadFridge);
 app.get('/f/:id', loadFridge);
-app.get('/f/:id/:flavor?', loadFridge);
+app.get('/e/:id?', loadFridge);
 
 app.post('/', function(req, res) {
     function getParams(m, d, k) {

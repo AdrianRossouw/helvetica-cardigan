@@ -18,7 +18,8 @@
     "redis": "~0.8.2",
     "async": "~0.1.22",
     "jquery": "~1.7.3",
-    "connect": "~2.6.2"
+    "connect": "~2.6.2",
+    "underscore.deferred": "^0.4.0"
   },
   "engines": {
     "node": "0.8.x"

@@ -94,6 +94,9 @@ a.back {
 a.title {
   left: 50px;
 }
+.embed a.return { display: none; }
+.embed a.title { left: 5px; }
+
 .add-fridge-ui,
 .share-fridge-ui {
   position: fixed;
@@ -101,6 +104,10 @@ a.title {
   top: 5px;
   right: 5px;
   text-align: right;
+}
+.embed .add-fridge-ui,
+.embed .share-fridge-ui {
+  display: none;
 }
 
 .add-fridge-ui {
