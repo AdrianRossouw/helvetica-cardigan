@@ -121,9 +121,16 @@ a.title {
   background-color: #222;
   color: #fff;
 }
-.words {
+.words-collection {
   position: relative;
 }
+
+.fridge {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
 .word {
   position: absolute;
   padding: 0 11px;
