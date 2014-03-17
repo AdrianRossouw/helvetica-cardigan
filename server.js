@@ -174,7 +174,7 @@ var server = app.listen(8000);
 var io = require('socket.io').listen(server);
 io.set('log level', 2);
 function extractWords(text) {
-    var text = text.toLowerCase();
+    text = text.toLowerCase();
     text = text.replace(/\n/g, ' ');
     text = text.replace(/[^A-Za-z\-\'0-9\ ]/g, '');
 
@@ -246,6 +246,8 @@ function generateWords(dict, common, random) {
     return words.concat(moreWords);
 }
 
+fridges['default'] = new models.Fridge({id: 'default'});
+fridges['default'].fetch().then(function() { fridge.setup(); });
 
 function loadFridge(req, res, next) {
     var id = req.params.id || 'default';
